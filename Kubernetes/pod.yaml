@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: summarizer
+  labels:
+    app: summarizer
+spec: 
+  containers:
+    - name: summarizer
+      image: summarization-api 
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 8000
+          name: summarizer

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ isDarkMode: false }" x-init="
+  isDarkMode = localStorage.getItem('darkMode') === 'true';
+  $watch('isDarkMode', val => localStorage.setItem('darkMode', val))
+" :class="{ 'dark': isDarkMode }">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insightful Summaries</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    textarea::-webkit-scrollbar { width: 8px; }
+    textarea::-webkit-scrollbar-track { background: #f1f5f9; }
+    html.dark textarea::-webkit-scrollbar-track { background: #1e293b; }
+    textarea::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    html.dark textarea::-webkit-scrollbar-thumb { background: #475569; }
+    textarea::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    html.dark textarea::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+
+<body class="bg-slate-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+  <div class="absolute top-0 left-0 -z-10 h-full w-full bg-white dark:bg-gray-900">
+      <div class="absolute top-0 left-0 h-full w-full bg-gradient-to-br from-indigo-50 via-white to-blue-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900/20"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20"
+      x-data="summarizerApp()">
+
+    <header class="text-center mb-10 relative">
+      <div class="absolute top-0 right-0">
+        <button @click="isDarkMode = !isDarkMode" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors">
+          <svg x-show="!isDarkMode" x-cloak xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <svg x-show="isDarkMode" x-cloak xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">Insightful Summaries</h1>
+      <p class="mt-3 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        Paste your text below to generate a concise summary with our advanced AI.
+      </p>
+    </header>
+
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700">
+      <form @submit.prevent="getSummary">
+        <div>
+          <label for="text_to_summarize" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Your Text
+          </label>
+          <div class="relative">
+            <textarea id="text_to_summarize" name="text_to_summarize" rows="12" x-model="inputText"
+                      maxlength="5000"
+                      class="block w-full text-base rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700
+                             text-gray-900 dark:text-gray-200 shadow-inner transition p-4
+                             focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500
+                             dark:placeholder-gray-400"
+                      placeholder="Paste up to ~800 words (≈5000 characters)..." required></textarea>
+            <div class="absolute bottom-3 right-3 text-xs text-gray-500 dark:text-gray-400"
+                 x-text="`${wordCount} words / ${charCount} characters`"></div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Summary Length
+            </label>
+            <div class="flex bg-gray-100 dark:bg-slate-900/50 rounded-xl p-1 w-max">
+                <template x-for="option in ['concise','medium','detailed']" :key="option">
+                    <button
+                        type="button"
+                        @click="summaryLength = option"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                        :class="summaryLength === option
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-slate-700'">
+                    <span x-text="option.charAt(0).toUpperCase() + option.slice(1)"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="mt-8 flex items-center justify-end space-x-4">
+          <button type="button" @click="clearForm"
+                  class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-500/10 hover:bg-gray-500/20 rounded-lg transition-colors">
+            Clear
+          </button>
+          <button type="submit" :disabled="isLoading || !inputText.trim()"
+                  class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg
+                         hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                         dark:focus:ring-offset-slate-800 transition-all duration-200 disabled:bg-indigo-400
+                         disabled:cursor-not-allowed transform hover:scale-105 active:scale-100">
+            <svg x-show="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            <span x-text="isLoading ? 'Summarizing...' : 'Generate Summary'"></span>
+          </button>
+        </div>
+      </form>
+
+      <div x-show="summary || errorMessage" x-cloak
+           x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 translate-y-4"
+           x-transition:enter-end="opacity-100 translate-y-0"
+           class="mt-8 border-t border-gray-200 dark:border-slate-700 pt-6">
+        
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Result</h2>
+          <button x-show="summary && !errorMessage" @click="copyToClipboard"
+                  class="px-3 py-1.5 text-sm font-medium rounded-lg flex items-center transition-all duration-200"
+                  :class="copySuccess ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600'">
+            <svg x-show="!copySuccess" x-cloak class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <svg x-show="copySuccess" x-cloak class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span x-text="copySuccess ? 'Copied!' : 'Copy'"></span>
+          </button>
+        </div>
+
+        <div x-show="errorMessage" x-cloak class="p-4 text-sm text-red-800 dark:text-red-300 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20" role="alert">
+          <span class="font-medium">Error:</span> <span x-text="errorMessage"></span>
+        </div>
+
+        <div x-show="summary && !errorMessage" x-cloak
+             class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-gray-200 dark:border-slate-700">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap" x-text="summary"></p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center mt-12 text-gray-500 dark:text-gray-500 text-sm">
+      <p>&copy; 2025 Insightful Summaries. Powered by FastAPI & Hugging Face Transformers.</p>
+    </footer>
+  </div>
+
+  <script>
+    const summarizerApp = () => ({
+      summary: '',
+      inputText: '',
+      isLoading: false,
+      errorMessage: '',
+      copySuccess: false,
+      summaryLength: 'medium',
+
+      get wordCount() { return this.inputText.trim() ? this.inputText.trim().split(/\s+/).length : 0 },
+      get charCount() { return this.inputText.length },
+
+      getSummary() {
+        this.isLoading = true;
+        this.summary = '';
+        this.errorMessage = '';
+        const formData = new FormData();
+        formData.append('text_to_summarize', this.inputText);
+        formData.append('summary_length', this.summaryLength);
+
+        fetch('/summarize', { method: 'POST', body: formData })
+          .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err)))
+          .then(data => {
+            if (data.summary) this.summary = data.summary;
+            else if (data.error) this.errorMessage = data.error;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            this.errorMessage = error.error || 'A server error occurred. Please try again.';
+          })
+          .finally(() => { this.isLoading = false; });
+      },
+
+      clearForm() {
+        this.inputText = '';
+        this.summary = '';
+        this.errorMessage = '';
+        this.copySuccess = false;
+      },
+
+      copyToClipboard() {
+        if (!this.summary) return;
+        navigator.clipboard.writeText(this.summary)
+          .then(() => {
+            this.copySuccess = true;
+            setTimeout(() => this.copySuccess = false, 2500);
+          })
+          .catch(err => console.error('Could not copy text: ', err));
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summarizer-deployment
+  labels:
+    app: summarizer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: summarizer
+  template:
+    metadata: 
+      name: summarizer
+      labels:
+        app: summarizer
+    spec: 
+      containers:
+        - name: summarizer
+          image: summarization-api
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+              name: summarizer

@@ -1,0 +1,25 @@
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# swap files
+.dockerfile.swp
+.requirements.txt.swp
+.gitignore.swp
+
+# too large to push
+my-fine-tuned-bart-summarizer/ 

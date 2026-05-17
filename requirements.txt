@@ -1,0 +1,8 @@
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
+jinja2>=3.1.2
+transformers>=5.0.0
+# Force CPU-only PyTorch to keep the Docker image size manageable
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
