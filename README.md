@@ -20,8 +20,10 @@ A robust, production-ready FastAPI application for intelligent text summarizatio
 ├── main.py                             # Core FastAPI application logic
 ├── requirements.txt                    # Python dependencies
 ├── Dockerfile                          # Optimized instructions for containerization
-├── deployment.yaml                     # Kubernetes Deployment manifest
-├── service.yaml                        # Kubernetes Service manifest
+├── Kubernetes                          # Kubernetes folder
+|   ├── deployment.yaml                 # Kubernetes deployment manifest
+|   ├── service.yaml                    # Kubernetes Service manifest
+|   └── pod.yaml                        # Kubernetes Pod manifest (just for reference purpose)        
 ├── templates/                          
 │   └── index.html                      # Frontend UI template
 └── my-fine-tuned-bart-summarizer/      # (Required) Your local model directory
@@ -39,6 +41,12 @@ A robust, production-ready FastAPI application for intelligent text summarizatio
 * Minikube / Kubernetes (Optional, for cluster deployment)
 
 ---
+> ⚠️ **IMPORTANT PREREQUISITE: Model Generation**
+> Due to GitHub's 100MB file size limit, the fine-tuned model weights are not included in this repository. Before running the application, you must generate the model locally:
+> 1. Run the `Fined_tuned_BART.ipynb` notebook to fine-tune the BART model.
+> 2. Save the output into a new directory named exactly `my-fine-tuned-bart-summarizer` in the root of this project.
+> 
+> Once the model is saved, proceed with the setup steps below.
 
 ## 💻 Local Development (Without Docker)
 
