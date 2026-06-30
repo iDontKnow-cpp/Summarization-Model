@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # 1. Start from a lightweight official Python image
 FROM python:3.13-slim
 
@@ -8,7 +10,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 4. Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+  pip install -r requirements.txt
 
 # 5. Copy your application code and the fine-tuned model into the container
 COPY . .
